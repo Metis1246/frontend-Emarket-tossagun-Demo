@@ -789,15 +789,16 @@ function Appbar() {
                     placeholder="ค้นหาสินค้าภายในเว็บ"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
                   />
                 </IconField>
-                <Button
+                {/* <Button
                   className="p-0 m-0 border-900 text-primary"
                   icon="pi pi-search"
                   onClick={handleSearchClick}
                   rounded
                   style={{ width: '2.5rem', height: '2.5rem', backgroundColor: 'black' }}
-                />
+                /> */}
               </div>
             </div>
             <div className="flex justify-content-between align-items-center">

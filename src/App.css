@@ -567,3 +567,7 @@ body {
   z-index: 1;
 }
 
+.border-top-gray {
+  border-top: 1px solid #E4E4E4; 
+  padding-top: 1px; 
+}

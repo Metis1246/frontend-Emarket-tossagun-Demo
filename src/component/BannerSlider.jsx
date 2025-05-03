@@ -72,7 +72,7 @@ function BannerSlider() {
   return (
     <>
       {/* Desktop Version - Full Screen */}
-      <div className="relative hidden lg:block card">
+      <div className="relative hidden lg:block card mt-3 ">
         <div className="h-fit absolute top-0 right-0 mt-2 mr-7 bg-white-alpha-60 px-3 py-1 text-sm border-round-2xl z-1"> {/* เปลี่ยน text-md เป็น text-sm */}
           <p className="m-0 p-0 text-900">{currentIndex + 1}/{data.length}</p>
         </div>
