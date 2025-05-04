@@ -336,7 +336,7 @@ function ListProductsPage() {
               </div>
             </div>
           </div> */}
-          <div className="lg:hidden flex">
+          <div className="lg:hidden flex mb-">
             {/* <Button
               className="px-2"
               onClick={() => setVisibleSort(true)}
@@ -405,7 +405,7 @@ function ListProductsPage() {
                                     : img_placeholder
                                 }`}
                                 alt={product.product_name}
-                                className="w-12 border-1 surface-border "
+                                className=" border-1 surface-border "
                                 onError={(e) => {
                                   e.target.src = img_placeholder;
                                 }}
@@ -424,13 +424,13 @@ function ListProductsPage() {
                             </div>
                           </Link>
                           <div className="h-full p-3 flex flex-column justify-content-between ">
-                            <div>
-                              <p className="m-0 p-0 text-xs font-normal text-right">
-                                คลัง : {product.product_stock}
-                              </p>
-                              <h4 className="product-name m-0 p-0  two-lines-ellipsis font-semibold">
+                            <div className="flex justify-between items-center">
+                              <h4 className="product-name m-0 p-0 two-lines-ellipsis font-semibold text-left flex-1 pr-2">
                                 {product.product_name}
                               </h4>
+                              <p className="m-0 p-0 text-xs font-normal text-right whitespace-nowrap">
+                                คลัง : {product.product_stock}
+                              </p>
                             </div>
 
                             <div className="product-footer flex align-items-center justify-content-between">

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Products from "../../component/Products";
 import axios from "axios";
 
@@ -13,7 +13,7 @@ function HomeShop({ partner_id, setActiveTab }) {
   const fetchData = () => {
     axios({
       method: "get",
-      url: `${apiProductUrl}/product/bypartner/${partner_id}`
+      url: `${apiProductUrl}/product/bypartner/${partner_id}`,
     })
       .then((response) => {
         const shuffledData = shuffleArray(response.data.data);
@@ -30,24 +30,28 @@ function HomeShop({ partner_id, setActiveTab }) {
   }, []);
 
   const handleSeeMoreClick = () => {
-    setActiveTab('ShopListProduct'); // Switch to ShopListProduct when clicked
+    setActiveTab("ShopListProduct"); // Switch to ShopListProduct when clicked
   };
   return (
     <div className="shop">
       <div className="bg-white m-0 p-3 lg:mx-2 my-3">
-        <span>
-          ยินดีต้อนรับ
-        </span>
+        <span>ยินดีต้อนรับ</span>
       </div>
 
-      <div className="bg-white m-0 pt-3 lg:mx-2">
-        <div className="flex align-items-center justify-content-between px-3">
+      <div className="bg-white m-1\0 pt-3 lg:mx-2 font-normal py-2 ">
+        <div className="flex align-items-center justify-content-between px-3 ">
           <span>
             <>สินค้าแนะนำสำหรับคุณ</>
           </span>
 
-          <Link onClick={handleSeeMoreClick} className="no-underline text-900">ดูเพิ่มเติม <i className="pi pi-angle-right"></i></Link>
-
+          <Link
+            onClick={handleSeeMoreClick}
+            className="no-underline"
+            style={{ color: "#7F8C9F" }}
+          >
+            ดูเพิ่มเติม{" "}
+            <i className="pi pi-angle-right" style={{ color: "#7F8C9F" }}></i>
+          </Link>
         </div>
         <Products data={data} startIndex={0} />
       </div>
@@ -62,7 +66,7 @@ function HomeShop({ partner_id, setActiveTab }) {
         <Products data={data} startIndex={5} />
       </div> */}
     </div>
-  )
+  );
 }
 
-export default HomeShop
+export default HomeShop;
