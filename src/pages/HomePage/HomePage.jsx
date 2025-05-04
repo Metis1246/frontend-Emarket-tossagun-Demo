@@ -161,7 +161,8 @@ function HomePage() {
           <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
             <h2 className="m-0">สินค้าทั่วไป</h2>
             <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'normal' } })}>
-              <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
+            <p className="m-0" style={{ color: '#7F8C9F' }}>ดูเพิ่มเติม</p>
+            <i className="pi pi-chevron-right" style={{ color: '#7F8C9F' }}></i>
             </div>
           </div>
 
@@ -189,7 +190,8 @@ function HomePage() {
           <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
             <h2 className="m-0">สินค้าสหกรณ์</h2>
             <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'coop' } })}>
-              <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
+            <p className="m-0" style={{ color: '#7F8C9F' }}>ดูเพิ่มเติม</p>
+            <i className="pi pi-chevron-right" style={{ color: '#7F8C9F' }}></i>
             </div>
           </div>
 

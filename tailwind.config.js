@@ -2,8 +2,11 @@
 export default {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["Noto Sans Thai", "sans-serif"],
+      },
+    },
   },
   plugins: [],
-}
-
+};

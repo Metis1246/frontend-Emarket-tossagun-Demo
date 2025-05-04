@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
-import { useCart } from '../../router/CartContext';
+import { useCart } from "../../router/CartContext";
 import Filter from "../../component/Filter";
-import FilterSort from '../../component/FilterSort';
+import FilterSort from "../../component/FilterSort";
 import Footer from "../../component/Footer";
-import { Paginator } from 'primereact/paginator';
+import { Paginator } from "primereact/paginator";
 import { Button } from "primereact/button";
-import { Toast } from 'primereact/toast';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import img_placeholder from '../../assets/img_placeholder.png';
+import { Toast } from "primereact/toast";
+import { ProgressSpinner } from "primereact/progressspinner";
+import img_placeholder from "../../assets/img_placeholder.png";
 import CategoriesIcon from "../../component/CategoriesIcon";
 
 function ListProductsPage() {
@@ -19,51 +24,59 @@ function ListProductsPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
-  const searchTerm = searchParams.get("search") || ""; //search
+  const searchTerm = searchParams.get("search") || "";
   const { addToCart } = useCart();
 
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);  //filter
+  const [filteredData, setFilteredData] = useState([]);
   const [paginatedData, setPaginatedData] = useState([]);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(40);
   const [visible, setVisible] = useState(false);
   const [visibleSort, setVisibleSort] = useState(false);
   const toast = useRef(null);
-  const categoriesLocation = location.state?.categoryName ? location.state.categoryName : [];
-  const providersLocation = location.state?.providerName ? location.state.providerName : [];
+  const categoriesLocation = location.state?.categoryName
+    ? location.state.categoryName
+    : [];
+  const providersLocation = location.state?.providerName
+    ? location.state.providerName
+    : [];
   const defaultFilters = {
-    priceRanges: { key: 'allRange', value: 'All' },
+    priceRanges: { key: "allRange", value: "All" },
     selectedProviders: [],
     selectedCategories: [],
-    selectedSubCategories: []
+    selectedSubCategories: [],
   };
   const [filters, setFilters] = useState(defaultFilters);
-  const [sortOption, setSortOption] = useState('default');
+  const [sortOption, setSortOption] = useState("default");
   const [activeTab, setActiveTab] = useState("");
   const [priceSortOrder, setPriceSortOrder] = useState(null);
 
   const showSuccessToast = () => {
     toast.current.show({
-      severity: 'success', summary: 'เพิ่มในตะกร้าแล้ว', life: 2000
+      severity: "success",
+      summary: "เพิ่มในตะกร้าแล้ว",
+      life: 2000,
     });
   };
 
   const showWarningToast = () => {
     toast.current.show({
-      severity: 'error', summary: 'เข้าสู่ระบบเพื่อเพิ่มสินค้าใส่ตะกร้า', life: 2000
+      severity: "error",
+      summary: "เข้าสู่ระบบเพื่อเพิ่มสินค้าใส่ตะกร้า",
+      life: 2000,
     });
   };
 
   const filterProducts = (products, searchTerm, categoryName, providerName) => {
     return products.filter((product) => {
       if (searchTerm) {
-        return product.product_name.toLowerCase().includes(searchTerm.toLowerCase());
-      }
-      else if (categoryName) {
+        return product.product_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      } else if (categoryName) {
         return product.product_category.includes(categoryName);
-      }
-      else if (providerName) {
+      } else if (providerName) {
         return product.product_provider.includes(providerName);
       }
       return true;
@@ -71,9 +84,9 @@ function ListProductsPage() {
   };
 
   const sortProducts = (products, sortOption) => {
-    if (sortOption === 'lowToHigh') {
+    if (sortOption === "lowToHigh") {
       return [...products].sort((a, b) => a.product_price - b.product_price);
-    } else if (sortOption === 'highToLow') {
+    } else if (sortOption === "highToLow") {
       return [...products].sort((a, b) => b.product_price - a.product_price);
     }
     return products;
@@ -83,12 +96,13 @@ function ListProductsPage() {
 
   useEffect(() => {
     const fetchCategories = () => {
-
-      const fetchedCategories = Object.keys(CategoriesIcon).map((categoryName, index) => ({
-        key: index,
-        name: categoryName,
-        icon: CategoriesIcon[categoryName]
-      }));
+      const fetchedCategories = Object.keys(CategoriesIcon).map(
+        (categoryName, index) => ({
+          key: index,
+          name: categoryName,
+          icon: CategoriesIcon[categoryName],
+        })
+      );
 
       setCategories(fetchedCategories);
     };
@@ -96,41 +110,52 @@ function ListProductsPage() {
     fetchCategories();
   }, []);
 
+  const applyFilters = useCallback(
+    (filters) => {
+      let filtered;
 
+      if (searchTerm) {
+        filtered = filteredData;
+      } else {
+        filtered = data;
+      }
 
-  const applyFilters = useCallback((filters) => {
-    let filtered;
-
-    if (searchTerm) {
-      filtered = filteredData;
-    } else {
-      filtered = data;
-    }
-
-    if (filters.priceRanges.key !== 'allRange') {
-      filtered = filtered.filter(product => product.product_price >= filters.priceRanges.min && product.product_price <= filters.priceRanges.max);
-    }
-
-    if (filters.selectedProviders.length > 0) {
-      filtered = filtered.filter(product => filters.selectedProviders.includes(product.product_provider));
-    }
-
-    if (filters.selectedCategories.length > 0 || filters.selectedSubCategories.length > 0) {
-      filtered = filtered.filter(product => {
-        const categoryMatch = filters.selectedCategories.includes(product.product_category);
-        const subcategoryMatch = product.product_subcategory.some(subcategory =>
-          filters.selectedSubCategories.includes(subcategory)
+      if (filters.priceRanges.key !== "allRange") {
+        filtered = filtered.filter(
+          (product) =>
+            product.product_price >= filters.priceRanges.min &&
+            product.product_price <= filters.priceRanges.max
         );
-        return categoryMatch || subcategoryMatch;
-      });
-    }
+      }
 
-    filtered = sortProducts(filtered, sortOption);
+      if (filters.selectedProviders.length > 0) {
+        filtered = filtered.filter((product) =>
+          filters.selectedProviders.includes(product.product_provider)
+        );
+      }
 
-    setFilteredData(filtered);
-    setPaginatedData(filtered.slice(first, first + rows));
+      if (
+        filters.selectedCategories.length > 0 ||
+        filters.selectedSubCategories.length > 0
+      ) {
+        filtered = filtered.filter((product) => {
+          const categoryMatch = filters.selectedCategories.includes(
+            product.product_category
+          );
+          const subcategoryMatch = product.product_subcategory.some(
+            (subcategory) => filters.selectedSubCategories.includes(subcategory)
+          );
+          return categoryMatch || subcategoryMatch;
+        });
+      }
 
-  }, [data, sortOption, first, rows]);
+      filtered = sortProducts(filtered, sortOption);
+
+      setFilteredData(filtered);
+      setPaginatedData(filtered.slice(first, first + rows));
+    },
+    [data, sortOption, first, rows]
+  );
 
   const handleFilterChange = (updatedFilters) => {
     setFilters(updatedFilters);
@@ -146,17 +171,22 @@ function ListProductsPage() {
     setLoading(true);
     axios({
       method: "get",
-      url: `${apiProductUrl}/product`
+      url: `${apiProductUrl}/product`,
     })
       .then((response) => {
-        const filtered = filterProducts(response.data.data, searchTerm, location.state?.categoryName, location.state?.providerName);
+        const filtered = filterProducts(
+          response.data.data,
+          searchTerm,
+          location.state?.categoryName,
+          location.state?.providerName
+        );
         // const filtered = filterProducts(response.data.data, searchTerm);
         setData(response.data.data);
         setFilteredData(filtered);
         setPaginatedData(filtered.slice(first, first + rows));
       })
       .catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       })
       .finally(() => {
         setLoading(false);
@@ -184,7 +214,12 @@ function ListProductsPage() {
       setFilters(updatedFilters);
     }
     applyFilters(updatedFilters);
-  }, [location.state?.categoryName, location.state?.providerName, applyFilters, filters]);
+  }, [
+    location.state?.categoryName,
+    location.state?.providerName,
+    applyFilters,
+    filters,
+  ]);
 
   useEffect(() => {
     setPaginatedData(filteredData.slice(first, first + rows));
@@ -195,14 +230,13 @@ function ListProductsPage() {
     setRows(event.rows);
   };
 
-
   const addCart = (product) => {
     const token = localStorage.getItem("token");
     if (!token) {
       showWarningToast();
       window.location.href = import.meta.env.VITE_APP_API_URL;
     } else {
-      addToCart(product)
+      addToCart(product);
       showSuccessToast();
     }
   };
@@ -231,30 +265,63 @@ function ListProductsPage() {
     return sortedData;
   };
 
-
   return (
     <>
       <Toast ref={toast} position="top-center" />
-      <ul className='section-sortbar bg-white flex justify-content-between list-none m-0 px-5 py-0 gap-5 border-bottom-1 surface-border'>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'popular' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
-          onClick={() => setActiveTab('popular')}>
+      <ul className="section-sortbar bg-white flex justify-content-between list-none m-0 px-5 py-0 gap-5 border-bottom-1 surface-border">
+        <li
+          className={`py-2 list-none cursor-pointer ${
+            activeTab === "popular"
+              ? "border-bottom-3  border-yellow-500 text-yellow-500"
+              : ""
+          }`}
+          onClick={() => setActiveTab("popular")}
+        >
           ยอดนิยม
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'new' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
-          onClick={() => setActiveTab('new')}>
+        <li
+          className={`py-2 list-none cursor-pointer ${
+            activeTab === "new"
+              ? "border-bottom-3  border-yellow-500 text-yellow-500"
+              : ""
+          }`}
+          onClick={() => setActiveTab("new")}
+        >
           ใหม่
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'topSales' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
-          onClick={() => setActiveTab('topSales')}>
+        <li
+          className={`py-2 list-none cursor-pointer ${
+            activeTab === "topSales"
+              ? "border-bottom-3  border-yellow-500 text-yellow-500"
+              : ""
+          }`}
+          onClick={() => setActiveTab("topSales")}
+        >
           สินค้าขายดี
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'price' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+        <li
+          className={`py-2 list-none cursor-pointer ${
+            activeTab === "price"
+              ? "border-bottom-3  border-yellow-500 text-yellow-500"
+              : ""
+          }`}
           onClick={() => {
-            setActiveTab('price');
-            setPriceSortOrder((prevOrder) => prevOrder === 'asc' ? 'desc' : 'asc');
-          }}>
+            setActiveTab("price");
+            setPriceSortOrder((prevOrder) =>
+              prevOrder === "asc" ? "desc" : "asc"
+            );
+          }}
+        >
           ราคา{" "}
-          <i className={`pi ${priceSortOrder === 'asc' ? 'pi-arrow-down' : priceSortOrder === 'desc' ? 'pi-arrow-up' : 'pi-sort-alt'}`} />
+          <i
+            className={`pi ${
+              priceSortOrder === "asc"
+                ? "pi-arrow-down"
+                : priceSortOrder === "desc"
+                ? "pi-arrow-up"
+                : "pi-sort-alt"
+            }`}
+          />
         </li>
       </ul>
       <div className="p-3">
@@ -279,11 +346,10 @@ function ListProductsPage() {
             <Button
               className="py-1 px-2"
               onClick={() => setVisible(true)}
-              label="กรอง" icon="pi pi-sliders-h"
-
+              label="กรอง"
+              icon="pi pi-sliders-h"
             />
           </div>
-
         </div>
         <div className="panel w-full flex">
           <div className="hidden lg:block mr-3">
@@ -308,37 +374,74 @@ function ListProductsPage() {
               {paginatedData.length ? (
                 <div className="w-full">
                   {/* {searchTerm && <h2 className="mt-0 font-semibold">ผลการค้นหา &quot;{searchTerm}&quot;</h2>} */}
-                  {location.state?.categoryName && <h2 className="mt-0 text-xs">ผลการค้นหาตามหมวดหมู่ &quot;{location.state?.categoryName}&quot;</h2>}
+                  {location.state?.categoryName && (
+                    <h2 className="mt-0 text-xs">
+                      ผลการค้นหาตามหมวดหมู่ &quot;{location.state?.categoryName}
+                      &quot;
+                    </h2>
+                  )}
                   <div className="product-list">
                     {sortData().map((product, index) => (
-                      <div key={index} className="relative flex h-18rem sm:h-28rem">
-                        <div className="w-full border-1 surface-border bg-white flex flex-column">
-                          <Link to={`/List-Product/product/${product._id}`} state={{ product }}>
+                      <div
+                        key={index}
+                        className="relative flex h-10 rem sm:h-26rem"
+                      >
+                        <div className="w-full border-1 surface-border bg-white flex flex-column product-item-container">
+                          <Link
+                            to={`/List-Product/product/${product._id}`}
+                            state={{ product }}
+                          >
                             <div className="square-image">
                               <img
-                                src={`${product.product_image ? apiProductUrl + product.product_image : product.product_subimage1 ? apiProductUrl + product.product_subimage1 : product.product_subimage2 ? apiProductUrl + product.product_subimage2 : product.product_subimage3 ? apiProductUrl + product.product_subimage3 : img_placeholder}`}
+                                src={`${
+                                  product.product_image
+                                    ? apiProductUrl + product.product_image
+                                    : product.product_subimage1
+                                    ? apiProductUrl + product.product_subimage1
+                                    : product.product_subimage2
+                                    ? apiProductUrl + product.product_subimage2
+                                    : product.product_subimage3
+                                    ? apiProductUrl + product.product_subimage3
+                                    : img_placeholder
+                                }`}
                                 alt={product.product_name}
-                                className="w-12 border-1 surface-border"
-                                onError={(e) => { e.target.src = img_placeholder; }}
+                                className="w-12 border-1 surface-border "
+                                onError={(e) => {
+                                  e.target.src = img_placeholder;
+                                }}
                               />
-                              <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-900'}`} style={{
-                                position: "absolute",
-                                top: "-0.5rem",
-                                right: "0rem"
-                              }}>{product.product_provider === 'coop' ? 'สินค้าสหกรณ์' : 'สินค้าทั่วไป'}</p>
+                              <p
+                                className={`product-category-label w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-semibold ${
+                                  product.product_provider === "coop"
+                                    ? "bg-green-600 text-white"
+                                    : "bg-primary-400 text-900"
+                                }`}
+                              >
+                                {product.product_provider === "coop"
+                                  ? "สินค้าสหกรณ์"
+                                  : "สินค้าทั่วไป"}
+                              </p>
                             </div>
                           </Link>
-                          <div className="h-full p-2 flex flex-column justify-content-between">
+                          <div className="h-full p-3 flex flex-column justify-content-between ">
                             <div>
-                              <p className="m-0 p-0 text-xs font-normal text-right">คลัง : {product.product_stock}</p>
-                              <h4 className="m-0 p-0 font-normal two-lines-ellipsis">{product.product_name}</h4>
-
+                              <p className="m-0 p-0 text-xs font-normal text-right">
+                                คลัง : {product.product_stock}
+                              </p>
+                              <h4 className="product-name m-0 p-0  two-lines-ellipsis font-semibold">
+                                {product.product_name}
+                              </h4>
                             </div>
 
-                            <div className="flex align-items-center justify-content-between">
-                              <div className="font-bold">฿{Number(product.product_price).toLocaleString('en-US')}</div>
+                            <div className="product-footer flex align-items-center justify-content-between">
+                              <div className="product-price font-bold">
+                                ฿
+                                {Number(product.product_price).toLocaleString(
+                                  "en-US"
+                                )}
+                              </div>
                               <Button
-                                className='btn-plus-product'
+                                className="btn-plus-product"
                                 icon="pi pi-plus"
                                 onClick={() => addCart(product)}
                               />
@@ -352,19 +455,26 @@ function ListProductsPage() {
               ) : (
                 <div className="w-full">
                   {/* {searchTerm && <h2 className="mt-0 font-semibold">ผลการค้นหา "{searchTerm}"</h2>} */}
-                  {location.state?.categoryName && <h2 className="mt-0 text-xs">ผลการค้นหาตามหมวดหมู่ &quot;{location.state?.categoryName}&quot;</h2>}
+                  {location.state?.categoryName && (
+                    <h2 className="mt-0 text-xs">
+                      ผลการค้นหาตามหมวดหมู่ &quot;{location.state?.categoryName}
+                      &quot;
+                    </h2>
+                  )}
                   <div className="w-full flex justify-content-center">
                     <div className="flex flex-column justify-content-center align-items-center">
-                      <div className='flex justify-content-center'>
+                      <div className="flex justify-content-center">
                         {/* <img src="https://www.makro.pro/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fpage-not-found.7cd1edd1.png&w=1920&q=75" alt="" className='w-16rem' /> */}
                       </div>
                       <h2 className="font-semibold mt-0 mb-2">ขออภัย</h2>
                       <p className="mt-0">ไม่พบข้อมูลจากการค้นหา</p>
-                      <Link to="/"><Button
-                        className="w-12rem mb-3"
-                        label="ค้นหาตามหมวดหมู่"
-                        rounded
-                      /></Link>
+                      <Link to="/">
+                        <Button
+                          className="w-12rem mb-3"
+                          label="ค้นหาตามหมวดหมู่"
+                          rounded
+                        />
+                      </Link>
                       <Link to="/">
                         <Button
                           className="w-12rem"
@@ -382,7 +492,13 @@ function ListProductsPage() {
         </div>
       </div>
       <div className="card">
-        <Paginator first={first} rows={rows} totalRecords={filteredData.length} onPageChange={onPageChange} template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" />
+        <Paginator
+          first={first}
+          rows={rows}
+          totalRecords={filteredData.length}
+          onPageChange={onPageChange}
+          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        />
       </div>
       <Footer />
     </>
